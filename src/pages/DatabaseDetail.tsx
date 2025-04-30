@@ -227,7 +227,7 @@ const DatabaseInteractions = ({ databaseId }) => {
             <div className="flex-1 flex-col border-l pl-6 hidden sm:block">
               <div className="space-y-1">
                 {[5, 4, 3, 2, 1].map((num) => {
-                  // This would be calculated from actual data
+                  //  This would be calculated from actual data
                   const percentage = Math.round(Math.random() * 100);
                   return (
                     <div key={num} className="flex items-center gap-2">
