@@ -1,0 +1,104 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 250 100% 99%;
+    --foreground: 250 10% 10%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 250 10% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 250 10% 10%;
+
+    --primary: 252 56% 58%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 270 91% 58%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 250 5% 95%;
+    --muted-foreground: 250 10% 40%;
+
+    --accent: 270 90% 75%;
+    --accent-foreground: 250 10% 10%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 250 10% 85%;
+    --input: 250 10% 85%;
+    --ring: 250 50% 60%;
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 250 100% 99%;
+    --sidebar-foreground: 250 10% 40%;
+    --sidebar-primary: 250 50% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 250 5% 95%;
+    --sidebar-accent-foreground: 250 10% 10%;
+    --sidebar-border: 250 10% 85%;
+    --sidebar-ring: 250 50% 60%;
+  }
+
+  .dark {
+    --background: 250 20% 10%;
+    --foreground: 0 0% 95%;
+
+    --card: 250 15% 15%;
+    --card-foreground: 0 0% 95%;
+
+    --popover: 250 15% 15%;
+    --popover-foreground: 0 0% 95%;
+
+    --primary: 252 56% 58%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 270 91% 58%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 250 15% 20%;
+    --muted-foreground: 250 10% 70%;
+
+    --accent: 270 50% 40%;
+    --accent-foreground: 0 0% 95%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 250 15% 25%;
+    --input: 250 15% 25%;
+    --ring: 250 40% 50%;
+
+    --sidebar-background: 250 15% 15%;
+    --sidebar-foreground: 250 10% 70%;
+    --sidebar-primary: 250 50% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 250 15% 20%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 250 15% 25%;
+    --sidebar-ring: 250 40% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r from-db-primary to-db-secondary text-transparent bg-clip-text;
+  }
+
+  .database-card {
+    @apply bg-card border border-border rounded-lg p-6 hover:shadow-md hover:shadow-db-accent/20 transition-all hover:-translate-y-1;
+  }
+}

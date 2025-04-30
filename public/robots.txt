@@ -1,0 +1,24 @@
+
+# db.aolbeam.com Robots.txt
+# Allow crawling of all content
+
+User-agent: *
+Allow: /
+
+# Specific instructions for major crawlers
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Twitterbot
+Allow: /
+
+User-agent: facebookexternalhit
+Allow: /
+
+# Sitemap location (to be implemented)
+Sitemap: https://db.aolbeam.com/sitemap.xml
