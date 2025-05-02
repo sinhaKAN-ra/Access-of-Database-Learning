@@ -420,6 +420,21 @@ const DatabaseDetail = () => {
     });
   };
 
+  const handleSharing = () => {
+    if(navigator.share) {
+      navigator.share({
+        title: database?.name,
+        text: `Check out this database: ${database?.name}`,
+        url: window.location.href,
+      }).catch((err) => {
+        console.error("Error sharing:", err);
+        handleCopyLink();
+      });
+    } else {
+      handleCopyLink();
+    }
+  }
+
   if (loading) {
     return (
       <Layout>
@@ -517,7 +532,7 @@ const DatabaseDetail = () => {
                       </a>
                     </Button>
                   )}
-                  <Button variant="ghost" size="sm" onClick={handleCopyLink}>
+                  <Button variant="ghost" size="sm" onClick={handleSharing}>
                     <Share2 className="mr-2 h-4 w-4" />
                     Share
                   </Button>
