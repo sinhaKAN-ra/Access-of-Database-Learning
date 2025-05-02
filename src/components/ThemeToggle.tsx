@@ -23,10 +23,11 @@ const ThemeToggle = () => {
     <button
       type="button"
       aria-label="Toggle Dark Mode"
-      className="p-2 rounded hover:bg-muted transition-colors"
+      className="p-2 rounded hover:bg-muted transition-colors flex items-center gap-4"
       onClick={() => setDark((d) => !d)}
     >
       {dark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+      <p className="md:hidden">Toggle {dark ? 'dark' : 'light'} mode</p>
     </button>
   );
 };

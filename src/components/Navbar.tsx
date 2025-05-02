@@ -18,7 +18,7 @@ const Navbar = () => {
   };
 
   return (
-    <header className="border-b backdrop-blur-sm bg-background/80 fixed w-full z-10">
+    <header className="border-b backdrop-blur-sm bg-background/80 fixed w-full z-10 top-0 left-0">
       <div className="container max-w-6xl flex items-center justify-between h-16 px-4 relative">
         <Link to="/" className="flex items-center space-x-2">
           <Database className="h-6 w-6 text-db-primary" />
