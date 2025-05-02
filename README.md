@@ -43,7 +43,7 @@ We **welcome** community contributions! Here’s how you can help:
 
 ```sh
 # Clone the repository
-git clone https://github.com/sinhaKAN-ra/DB.AOLBEAM.git
+git clone https://github.com/sinhaKAN-ra/Access-of-Database-Learning.git
 
 # Navigate to the project folder
 cd db-directory
