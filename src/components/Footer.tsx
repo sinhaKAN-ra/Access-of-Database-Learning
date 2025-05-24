@@ -2,6 +2,35 @@
 import { Link } from "react-router-dom";
 import { Database, Github, Twitter } from "lucide-react";
 
+type FooterLink = {
+  title: string;
+  links: {
+    name: string;
+    href: string;
+  }[]
+}
+
+const footerLinks: FooterLink[] = [
+  {
+    title: "Navigation",
+    links: [
+      { name: "All Databases", href: "/databases" },
+      { name: "Categories", href: "/categories" },
+      { name: "Contribute", href: "/contribute" },
+      { name: "About", href: "/about" },
+    ],
+  },
+  {
+    title: "Resources",
+    links: [
+      { name: "Add a Database", href: "/add-database" },
+      { name: "Compare Databases", href: "/compare" },
+      { name: "API Documentation", href: "https://github.com/sinhaKAN-ra/Access-of-Database-Learning" },
+      { name: "GitHub Repository", href: "https://github.com/sinhaKAN-ra/Access-of-Database-Learning" }
+    ]
+  }
+]
+
 const Footer = () => {
   return (
     <footer className="bg-gradient-to-tr from-muted/50 to-background border-t py-12 mt-20">
@@ -12,12 +41,12 @@ const Footer = () => {
               <Database className="h-6 w-6 text-db-primary" />
               <span className="font-bold text-lg">DB.AOLBEAM</span>
             </Link>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground text-left">
               Your comprehensive open-source directory of databases from around the world.
               Discover, compare, and contribute to the database knowledge base.
             </p>
             <div className="flex items-center space-x-4 mt-6">
-              <a href="https://github.com/aolbeam/db-directory" target="_blank" rel="noopener noreferrer" 
+              <a href="https://github.com/sinhaKAN-ra/Access-of-Database-Learning" target="_blank" rel="noopener noreferrer" 
                 className="hover:text-db-primary transition-colors">
                 <Github className="h-5 w-5" />
               </a>
@@ -28,58 +57,20 @@ const Footer = () => {
             </div>
           </div>
 
-          <div>
-            <h3 className="font-semibold text-lg mb-4">Navigation</h3>
-            <ul className="space-y-3">
-              <li>
-                <Link to="/databases" className="text-muted-foreground hover:text-db-primary transition-colors">
-                  All Databases
-                </Link>
-              </li>
-              <li>
-                <Link to="/categories" className="text-muted-foreground hover:text-db-primary transition-colors">
-                  Categories
-                </Link>
-              </li>
-              <li>
-                <Link to="/contribute" className="text-muted-foreground hover:text-db-primary transition-colors">
-                  Contribute
-                </Link>
-              </li>
-              <li>
-                <Link to="/about" className="text-muted-foreground hover:text-db-primary transition-colors">
-                  About
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="font-semibold text-lg mb-4">Resources</h3>
-            <ul className="space-y-3">
-              <li>
-                <Link to="/add-database" className="text-muted-foreground hover:text-db-primary transition-colors">
-                  Add a Database
-                </Link>
-              </li>
-              <li>
-                <Link to="/compare" className="text-muted-foreground hover:text-db-primary transition-colors">
-                  Compare Databases
-                </Link>
-              </li>
-              <li>
-                <a href="https://github.com/aolbeam/db-directory/wiki/API" className="text-muted-foreground hover:text-db-primary transition-colors">
-                  API Documentation
-                </a>
-              </li>
-              <li>
-                <a href="https://github.com/aolbeam/db-directory" target="_blank" rel="noopener noreferrer"
-                  className="text-muted-foreground hover:text-db-primary transition-colors">
-                  GitHub Repository
-                </a>
-              </li>
-            </ul>
-          </div>
+          {footerLinks.map((section, index) => (
+            <div key={index}>
+              <h3 className="font-semibold text-lg mb-4">{section.title}</h3>
+              <ul className="space-y-3">
+                {section.links.map((link, index) => (
+                  <li key={index}>
+                    <Link to={link.href} className="text-muted-foreground hover:text-db-primary transition-colors">
+                      {link.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
 
         <div className="border-t mt-12 pt-6 text-sm text-muted-foreground text-center">
