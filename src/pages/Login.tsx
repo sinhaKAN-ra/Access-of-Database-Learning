@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -15,7 +15,10 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     setError("");
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
     if (error) setError(error.message);
     else navigate("/");
     setLoading(false);
@@ -29,14 +32,14 @@ export default function Login() {
           type="email"
           placeholder="Email"
           value={email}
-          onChange={e => setEmail(e.target.value)}
+          onChange={(e) => setEmail(e.target.value)}
           required
         />
         <Input
           type="password"
           placeholder="Password"
           value={password}
-          onChange={e => setPassword(e.target.value)}
+          onChange={(e) => setPassword(e.target.value)}
           required
         />
         {error && <div className="text-red-500 text-sm">{error}</div>}
@@ -44,7 +47,10 @@ export default function Login() {
           {loading ? "Logging in..." : "Login"}
         </Button>
         <div className="text-sm text-center">
-          Don't have an account? <a href="/register" className="text-blue-500 underline">Register</a>
+          Don't have an account?
+          <Link to="/register" className="text-blue-500 underline">
+            Register
+          </Link>
         </div>
       </form>
     </div>

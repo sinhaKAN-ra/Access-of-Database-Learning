@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -34,14 +34,14 @@ export default function Register() {
           type="email"
           placeholder="Email"
           value={email}
-          onChange={e => setEmail(e.target.value)}
+          onChange={(e) => setEmail(e.target.value)}
           required
         />
         <Input
           type="password"
           placeholder="Password"
           value={password}
-          onChange={e => setPassword(e.target.value)}
+          onChange={(e) => setPassword(e.target.value)}
           required
         />
         {error && <div className="text-red-500 text-sm">{error}</div>}
@@ -50,7 +50,13 @@ export default function Register() {
           {loading ? "Registering..." : "Register"}
         </Button>
         <div className="text-sm text-center">
-          Already have an account? <a href="/login" className="text-blue-500 underline">Login</a>
+          <Link to="/login" className="text-blue-500 underline">
+            Login
+          </Link>
+          Already have an account?
+          <Link to="/login" className="text-blue-500 underline">
+            Login
+          </Link>
         </div>
       </form>
     </div>
