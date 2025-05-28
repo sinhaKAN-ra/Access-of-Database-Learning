@@ -137,17 +137,29 @@ const Navbar = () => {
           >
             About
           </Link>
-          <div className="pt-4 border-t flex items-center justify-between">
-            <Link to="/search" onClick={() => setIsMenuOpen(false)}>
-              <Button variant="outline" size="sm">
+          <div className="pt-4 border-t flex items-center gap-4">
+            <Link
+              to="/search"
+              className="w-full"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full justify-start"
+              >
                 <Search className="mr-2 h-4 w-4" />
                 Search
               </Button>
             </Link>
-            <Link to="/add-database" onClick={() => setIsMenuOpen(false)}>
+            <Link
+              to="/add-database"
+              className="w-full"
+              onClick={() => setIsMenuOpen(false)}
+            >
               <Button
                 size="sm"
-                className="bg-gradient-to-r from-db-primary to-db-secondary hover:opacity-90"
+                className="bg-gradient-to-r from-db-primary to-db-secondary hover:opacity-90 w-full"
               >
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Add Database
