@@ -16,22 +16,26 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/components/ui/use-toast";
 import { toast } from "sonner";
-import { PlusCircle, MinusCircle } from "lucide-react";
+import { PlusCircle, MinusCircle, Github } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { addDatabase } from "@/services/databaseService";
 import { DatabaseType } from "@/types/database";
-
-import { useAuth } from "@/hooks/useAuth";
+import { getUserProfile, setGitHubUsername } from "@/services/userInteractionService";
+import { GitHubUsernamePrompt } from "@/components/GitHubUsernamePrompt";
 
 const AddDatabasePage = () => {
   const { toast: uiToast } = useToast();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [user, setUser] = useState(null);
+  const [showUsernamePrompt, setShowUsernamePrompt] = useState(false);
   
   // Form states
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [shortDescription, setShortDescription] = useState("");
+  const [tagline, setTagline] = useState("");
+  const [keyStrength, setKeyStrength] = useState("");
   const [logoUrl, setLogoUrl] = useState("");
   const [websiteUrl, setWebsiteUrl] = useState("");
   const [documentationUrl, setDocumentationUrl] = useState("");
@@ -48,6 +52,16 @@ const AddDatabasePage = () => {
   const [languages, setLanguages] = useState([""]);
   const [pros, setPros] = useState([""]);
   const [cons, setCons] = useState([""]);
+  const [notRecommendedFor, setNotRecommendedFor] = useState([""]);
+
+  // Check for user on component mount
+  useState(() => {
+    const checkUser = async () => {
+      const profile = await getUserProfile();
+      setUser(profile);
+    };
+    checkUser();
+  });
   
   // Generic handler for dynamic list fields
   const handleListChange = (
@@ -79,8 +93,19 @@ const AddDatabasePage = () => {
     }
   };
 
+  const handleUsernameSet = async (username: string) => {
+    const profile = await getUserProfile();
+    setUser(profile);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Check if user has set GitHub username
+    if (!user) {
+      setShowUsernamePrompt(true);
+      return;
+    }
     
     // Basic validation
     if (!name || !description || !category || !type || !license) {
@@ -99,6 +124,7 @@ const AddDatabasePage = () => {
     const filteredLanguages = languages.filter((language) => language.trim() !== "");
     const filteredPros = pros.filter((pro) => pro.trim() !== "");
     const filteredCons = cons.filter((con) => con.trim() !== "");
+    const filteredNotRecommendedFor = notRecommendedFor.filter((item) => item.trim() !== "");
     
     try {
       setIsSubmitting(true);
@@ -108,6 +134,8 @@ const AddDatabasePage = () => {
         name,
         description,
         shortDescription: shortDescription || description.substring(0, 120) + '...',
+        tagline,
+        keyStrength,
         logoUrl: logoUrl || undefined,
         websiteUrl: websiteUrl || undefined,
         documentationUrl: documentationUrl || undefined,
@@ -122,13 +150,10 @@ const AddDatabasePage = () => {
         languages: filteredLanguages,
         pros: filteredPros,
         cons: filteredCons,
+        notRecommendedFor: filteredNotRecommendedFor,
         popularity: 50, // Default popularity for new entries
-        // Added required fields for DatabaseType
-        tagline: '',
-        keyStrength: '',
-        notRecommendedFor: [],
         useCaseDetails: [],
-        contributors: '',
+        contributors: user.username, // Set the contributor
       };
       
       // Add the database
@@ -137,7 +162,7 @@ const AddDatabasePage = () => {
       console.log("Saved database:", savedDatabase);
       
       // Show success message
-      toast.success("Database added successfully!");
+      toast.success("Database added successfully! It's now stored as a markdown file in the repository.");
       
       // Redirect to the new database page
       setTimeout(() => {
@@ -151,29 +176,40 @@ const AddDatabasePage = () => {
     }
   };
 
-  const { user } = useAuth();
-  if (!user) {
-    return (
-      <Layout>
-        <div className="pt-24 pb-16 container px-4 max-w-3xl">
-          <div className="text-yellow-700 bg-yellow-100 border border-yellow-300 rounded px-4 py-4 text-center">
-            You need to <a href="/login" className="text-blue-600 underline">login</a> to add a database.
-          </div>
-        </div>
-      </Layout>
-    );
-  }
-
   return (
     <Layout>
       <div className="pt-24 pb-16 container px-4 max-w-3xl">
         <form onSubmit={handleSubmit} className="space-y-8">
           <Card className="p-8">
             <h1 className="text-2xl font-bold mb-6">Add a New Database</h1>
-            <p className="text-muted-foreground mb-8">
-              Help grow our directory by adding a database that isn't listed yet. 
-              Your contribution will be added immediately to our directory.
-            </p>
+            <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
+              <h3 className="font-medium text-blue-800 dark:text-blue-200 mb-2 flex items-center gap-2">
+                <Github className="h-4 w-4" />
+                Open Source & Transparent
+              </h3>
+              <p className="text-blue-700 dark:text-blue-300 text-sm">
+                Your contribution will be stored as a markdown file in our GitHub repository. 
+                This ensures full transparency, version control, and allows anyone to contribute directly via GitHub.
+                {!user && " Please set your GitHub username to get started."}
+              </p>
+              {!user && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="mt-3"
+                  onClick={() => setShowUsernamePrompt(true)}
+                >
+                  <Github className="mr-2 h-4 w-4" />
+                  Set GitHub Username
+                </Button>
+              )}
+              {user && (
+                <p className="text-blue-700 dark:text-blue-300 text-sm mt-2">
+                  Contributing as: <strong>{user.username}</strong>
+                </p>
+              )}
+            </div>
 
             <Card className="p-6">
               <h2 className="text-xl font-semibold mb-4">Basic Information</h2>
@@ -206,6 +242,18 @@ const AddDatabasePage = () => {
                     />
                   </div>
                 </div>
+
+                <div>
+                  <Label htmlFor="tagline" className="mb-1.5 block">
+                    Tagline
+                  </Label>
+                  <Input 
+                    id="tagline"
+                    value={tagline}
+                    onChange={(e) => setTagline(e.target.value)}
+                    placeholder="A brief, catchy description"
+                  />
+                </div>
                 
                 <div>
                   <Label htmlFor="shortDescription" className="mb-1.5 block">
@@ -230,6 +278,18 @@ const AddDatabasePage = () => {
                     placeholder="Provide a comprehensive description of the database..."
                     rows={5}
                     required
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="keyStrength" className="mb-1.5 block">
+                    Key Strength
+                  </Label>
+                  <Input 
+                    id="keyStrength"
+                    value={keyStrength}
+                    onChange={(e) => setKeyStrength(e.target.value)}
+                    placeholder="What makes this database stand out?"
                   />
                 </div>
 
@@ -475,7 +535,7 @@ const AddDatabasePage = () => {
             </Card>
 
             <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-4">Pros and Cons</h2>
+              <h2 className="text-xl font-semibold mb-4">Pros, Cons & Limitations</h2>
               
               <div className="grid md:grid-cols-2 gap-6">
                 {/* Pros */}
@@ -544,6 +604,42 @@ const AddDatabasePage = () => {
                   </Button>
                 </div>
               </div>
+
+              {/* Not Recommended For */}
+              <div className="mt-6">
+                <Label className="mb-1.5 block">Not Recommended For</Label>
+                <p className="text-sm text-muted-foreground mb-3">
+                  Scenarios or use cases where this database might not be the best choice
+                </p>
+                {notRecommendedFor.map((item, index) => (
+                  <div key={`notRecommended-${index}`} className="flex gap-2 mb-2">
+                    <Input 
+                      value={item}
+                      onChange={(e) => handleListChange(index, e.target.value, notRecommendedFor, setNotRecommendedFor)}
+                      placeholder={`Not recommended for ${index + 1}`}
+                    />
+                    <Button 
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeListItem(index, notRecommendedFor, setNotRecommendedFor)}
+                      disabled={notRecommendedFor.length === 1}
+                    >
+                      <MinusCircle className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+                <Button 
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="mt-1"
+                  onClick={() => addListItem(notRecommendedFor, setNotRecommendedFor)}
+                >
+                  <PlusCircle className="h-4 w-4 mr-1" />
+                  Add Limitation
+                </Button>
+              </div>
             </Card>
 
             <div className="flex justify-end">
@@ -551,13 +647,20 @@ const AddDatabasePage = () => {
                 type="submit"
                 className="bg-gradient-to-r from-db-primary to-db-secondary hover:opacity-90 px-8"
                 size="lg"
-                disabled={isSubmitting}
+                disabled={isSubmitting || !user}
               >
                 {isSubmitting ? "Submitting..." : "Submit Database"}
               </Button>
             </div>
           </Card>
         </form>
+
+        {/* GitHub Username Prompt */}
+        <GitHubUsernamePrompt
+          open={showUsernamePrompt}
+          onOpenChange={setShowUsernamePrompt}
+          onUsernameSet={handleUsernameSet}
+        />
       </div>
     </Layout>
   );
