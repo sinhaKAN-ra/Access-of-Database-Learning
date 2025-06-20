@@ -21,7 +21,7 @@ export interface MarkdownDatabaseEntry {
   stars?: number;
   createdAt: string;
   updatedAt: string;
-  // New fields for enhanced metadata
+  // Enhanced metadata fields
   tagline: string;
   keyStrength: string;
   notRecommendedFor: string[];
@@ -30,6 +30,28 @@ export interface MarkdownDatabaseEntry {
   // User interactions stored in markdown
   ratings: Rating[];
   comments: Comment[];
+  // Additional comprehensive fields
+  officialDescription: string;
+  architecture: string;
+  dataModel: string;
+  queryLanguage: string[];
+  indexingSupport: string[];
+  replicationSupport: boolean;
+  shardingSupport: boolean;
+  backupOptions: string[];
+  securityFeatures: string[];
+  performanceCharacteristics: string[];
+  scalabilityOptions: string[];
+  communitySize: string;
+  enterpriseSupport: boolean;
+  cloudProviders: string[];
+  onPremiseSupport: boolean;
+  apiSupport: string[];
+  integrations: string[];
+  developmentStatus: string;
+  latestVersion: string;
+  releaseFrequency: string;
+  maintenanceStatus: string;
 }
 
 export interface UseCaseDetail {
@@ -37,20 +59,32 @@ export interface UseCaseDetail {
   description: string;
   industry?: string;
   companySize?: string;
+  technicalRequirements?: string[];
+  benefits?: string[];
+  challenges?: string[];
 }
 
 export interface Rating {
   username: string;
+  email?: string;
   rating: number;
   comment?: string;
   date: string;
+  experience?: string; // e.g., "2 years", "6 months"
+  useCase?: string; // What they used it for
+  companySize?: string;
+  industry?: string;
 }
 
 export interface Comment {
   username: string;
+  email?: string;
   content: string;
   date: string;
   replies?: Comment[];
+  experience?: string;
+  useCase?: string;
+  helpful?: number; // Number of people who found this helpful
 }
 
 export interface MarkdownFrontmatter {
@@ -68,4 +102,14 @@ export interface MarkdownFrontmatter {
   tagline: string;
   keyStrength: string;
   contributors: string;
+  officialDescription: string;
+  architecture: string;
+  dataModel: string;
+  replicationSupport: boolean;
+  shardingSupport: boolean;
+  enterpriseSupport: boolean;
+  onPremiseSupport: boolean;
+  developmentStatus: string;
+  latestVersion: string;
+  maintenanceStatus: string;
 }

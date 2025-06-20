@@ -40,7 +40,7 @@ export const parseFrontmatter = (content: string): { frontmatter: MarkdownFrontm
   return { frontmatter: frontmatter as MarkdownFrontmatter, body };
 };
 
-// Utility function to generate frontmatter string
+// Utility function to generate comprehensive frontmatter string
 export const generateFrontmatter = (data: MarkdownFrontmatter): string => {
   return `---
 name: "${data.name}"
@@ -57,10 +57,20 @@ updatedAt: "${data.updatedAt}"
 tagline: "${data.tagline}"
 keyStrength: "${data.keyStrength}"
 contributors: "${data.contributors}"
+officialDescription: "${data.officialDescription}"
+architecture: "${data.architecture}"
+dataModel: "${data.dataModel}"
+replicationSupport: ${data.replicationSupport}
+shardingSupport: ${data.shardingSupport}
+enterpriseSupport: ${data.enterpriseSupport}
+onPremiseSupport: ${data.onPremiseSupport}
+developmentStatus: "${data.developmentStatus}"
+latestVersion: "${data.latestVersion}"
+maintenanceStatus: "${data.maintenanceStatus}"
 ---`;
 };
 
-// Parse markdown content to extract structured data
+// Parse markdown content to extract all structured data
 export const parseMarkdownDatabase = (content: string): MarkdownDatabaseEntry => {
   const { frontmatter, body } = parseFrontmatter(content);
   
@@ -84,6 +94,18 @@ export const parseMarkdownDatabase = (content: string): MarkdownDatabaseEntry =>
     useCaseDetails: [],
     ratings: [],
     comments: [],
+    // Initialize comprehensive fields
+    queryLanguage: [],
+    indexingSupport: [],
+    backupOptions: [],
+    securityFeatures: [],
+    performanceCharacteristics: [],
+    scalabilityOptions: [],
+    communitySize: '',
+    cloudProviders: [],
+    apiSupport: [],
+    integrations: [],
+    releaseFrequency: '',
   };
 
   sections.forEach(section => {
@@ -116,6 +138,39 @@ export const parseMarkdownDatabase = (content: string): MarkdownDatabaseEntry =>
       case 'Supported Languages':
         entry.languages = content.split('\n').map(line => line.replace(/^- /, '')).filter(Boolean);
         break;
+      case 'Query Languages':
+        entry.queryLanguage = content.split('\n').map(line => line.replace(/^- /, '')).filter(Boolean);
+        break;
+      case 'Indexing Support':
+        entry.indexingSupport = content.split('\n').map(line => line.replace(/^- /, '')).filter(Boolean);
+        break;
+      case 'Backup Options':
+        entry.backupOptions = content.split('\n').map(line => line.replace(/^- /, '')).filter(Boolean);
+        break;
+      case 'Security Features':
+        entry.securityFeatures = content.split('\n').map(line => line.replace(/^- /, '')).filter(Boolean);
+        break;
+      case 'Performance Characteristics':
+        entry.performanceCharacteristics = content.split('\n').map(line => line.replace(/^- /, '')).filter(Boolean);
+        break;
+      case 'Scalability Options':
+        entry.scalabilityOptions = content.split('\n').map(line => line.replace(/^- /, '')).filter(Boolean);
+        break;
+      case 'Cloud Providers':
+        entry.cloudProviders = content.split('\n').map(line => line.replace(/^- /, '')).filter(Boolean);
+        break;
+      case 'API Support':
+        entry.apiSupport = content.split('\n').map(line => line.replace(/^- /, '')).filter(Boolean);
+        break;
+      case 'Integrations':
+        entry.integrations = content.split('\n').map(line => line.replace(/^- /, '')).filter(Boolean);
+        break;
+      case 'Community Size':
+        entry.communitySize = content;
+        break;
+      case 'Release Frequency':
+        entry.releaseFrequency = content;
+        break;
       case 'Pros':
         entry.pros = content.split('\n').map(line => line.replace(/^- /, '')).filter(Boolean);
         break;
@@ -125,35 +180,94 @@ export const parseMarkdownDatabase = (content: string): MarkdownDatabaseEntry =>
       case 'Not Recommended For':
         entry.notRecommendedFor = content.split('\n').map(line => line.replace(/^- /, '')).filter(Boolean);
         break;
+      case 'Detailed Use Cases':
+        // Parse detailed use cases
+        const useCaseBlocks = content.split('\n\n').filter(Boolean);
+        entry.useCaseDetails = useCaseBlocks.map(block => {
+          const lines = block.split('\n');
+          const titleLine = lines[0];
+          const descLine = lines[1];
+          const industryLine = lines.find(l => l.startsWith('Industry:'));
+          const sizeLine = lines.find(l => l.startsWith('Company Size:'));
+          const reqLines = lines.filter(l => l.startsWith('- Requirement:'));
+          const benefitLines = lines.filter(l => l.startsWith('- Benefit:'));
+          const challengeLines = lines.filter(l => l.startsWith('- Challenge:'));
+          
+          return {
+            title: titleLine.replace(/^### /, ''),
+            description: descLine,
+            industry: industryLine?.split('Industry:')[1]?.trim(),
+            companySize: sizeLine?.split('Company Size:')[1]?.trim(),
+            technicalRequirements: reqLines.map(l => l.replace('- Requirement: ', '')),
+            benefits: benefitLines.map(l => l.replace('- Benefit: ', '')),
+            challenges: challengeLines.map(l => l.replace('- Challenge: ', '')),
+          };
+        });
+        break;
       case 'Ratings':
-        // Parse ratings from markdown
+        // Parse enhanced ratings from markdown
         const ratingBlocks = content.split('\n\n').filter(Boolean);
         entry.ratings = ratingBlocks.map(block => {
           const lines = block.split('\n');
-          const userLine = lines[0];
-          const ratingLine = lines[1];
-          const commentLines = lines.slice(2);
+          const userLine = lines.find(l => l.startsWith('User:'));
+          const emailLine = lines.find(l => l.startsWith('Email:'));
+          const ratingLine = lines.find(l => l.startsWith('Rating:'));
+          const experienceLine = lines.find(l => l.startsWith('Experience:'));
+          const useCaseLine = lines.find(l => l.startsWith('Use Case:'));
+          const companySizeLine = lines.find(l => l.startsWith('Company Size:'));
+          const industryLine = lines.find(l => l.startsWith('Industry:'));
+          const dateLine = lines.find(l => l.startsWith('Date:'));
+          const commentLines = lines.filter(l => 
+            !l.startsWith('User:') && 
+            !l.startsWith('Email:') && 
+            !l.startsWith('Rating:') && 
+            !l.startsWith('Experience:') && 
+            !l.startsWith('Use Case:') && 
+            !l.startsWith('Company Size:') && 
+            !l.startsWith('Industry:') && 
+            !l.startsWith('Date:')
+          );
           
           return {
-            username: userLine.replace(/^User: /, ''),
-            rating: parseInt(ratingLine.replace(/^Rating: /, '')),
+            username: userLine?.replace('User: ', '') || '',
+            email: emailLine?.replace('Email: ', ''),
+            rating: parseInt(ratingLine?.replace('Rating: ', '') || '0'),
+            experience: experienceLine?.replace('Experience: ', ''),
+            useCase: useCaseLine?.replace('Use Case: ', ''),
+            companySize: companySizeLine?.replace('Company Size: ', ''),
+            industry: industryLine?.replace('Industry: ', ''),
+            date: dateLine?.replace('Date: ', '') || new Date().toISOString(),
             comment: commentLines.join('\n'),
-            date: new Date().toISOString(),
           };
         });
         break;
       case 'Comments':
-        // Parse comments from markdown
+        // Parse enhanced comments from markdown
         const commentBlocks = content.split('\n\n').filter(Boolean);
         entry.comments = commentBlocks.map(block => {
           const lines = block.split('\n');
-          const userLine = lines[0];
-          const dateLine = lines[1];
-          const contentLines = lines.slice(2);
+          const userLine = lines.find(l => l.startsWith('User:'));
+          const emailLine = lines.find(l => l.startsWith('Email:'));
+          const dateLine = lines.find(l => l.startsWith('Date:'));
+          const experienceLine = lines.find(l => l.startsWith('Experience:'));
+          const useCaseLine = lines.find(l => l.startsWith('Use Case:'));
+          const helpfulLine = lines.find(l => l.startsWith('Helpful:'));
+          const contentLines = lines.filter(l => 
+            !l.startsWith('User:') && 
+            !l.startsWith('Email:') && 
+            !l.startsWith('Date:') && 
+            !l.startsWith('Experience:') && 
+            !l.startsWith('Use Case:') && 
+            !l.startsWith('Helpful:')
+          );
           
           return {
-            username: userLine.replace(/^User: /, ''),
-            date: dateLine.replace(/^Date: /, ''),
+            username: userLine?.replace('User: ', '') || '',
+            email: emailLine?.replace('Email: ', ''),
+            date: dateLine?.replace('Date: ', '') || new Date().toISOString(),
+            experience: experienceLine?.replace('Experience: ', ''),
+            useCase: useCaseLine?.replace('Use Case: ', ''),
+            helpful: parseInt(helpfulLine?.replace('Helpful: ', '') || '0'),
             content: contentLines.join('\n'),
           };
         });
@@ -164,7 +278,7 @@ export const parseMarkdownDatabase = (content: string): MarkdownDatabaseEntry =>
   return entry;
 };
 
-// Generate markdown content from database entry
+// Generate comprehensive markdown content from database entry
 export const generateMarkdownContent = (entry: MarkdownDatabaseEntry): string => {
   const frontmatter = generateFrontmatter({
     name: entry.name,
@@ -181,6 +295,16 @@ export const generateMarkdownContent = (entry: MarkdownDatabaseEntry): string =>
     tagline: entry.tagline,
     keyStrength: entry.keyStrength,
     contributors: entry.contributors,
+    officialDescription: entry.officialDescription || '',
+    architecture: entry.architecture || '',
+    dataModel: entry.dataModel || '',
+    replicationSupport: entry.replicationSupport || false,
+    shardingSupport: entry.shardingSupport || false,
+    enterpriseSupport: entry.enterpriseSupport || false,
+    onPremiseSupport: entry.onPremiseSupport || false,
+    developmentStatus: entry.developmentStatus || '',
+    latestVersion: entry.latestVersion || '',
+    maintenanceStatus: entry.maintenanceStatus || '',
   });
 
   const sections = [
@@ -198,14 +322,65 @@ export const generateMarkdownContent = (entry: MarkdownDatabaseEntry): string =>
     entry.githubUrl ? `GitHub: ${entry.githubUrl}` : '',
     entry.logoUrl ? `Logo: ${entry.logoUrl}` : '',
     '',
+    '## Technical Specifications',
+    `**Architecture:** ${entry.architecture || 'Not specified'}`,
+    `**Data Model:** ${entry.dataModel || 'Not specified'}`,
+    `**Replication Support:** ${entry.replicationSupport ? 'Yes' : 'No'}`,
+    `**Sharding Support:** ${entry.shardingSupport ? 'Yes' : 'No'}`,
+    `**Enterprise Support:** ${entry.enterpriseSupport ? 'Yes' : 'No'}`,
+    `**Latest Version:** ${entry.latestVersion || 'Not specified'}`,
+    `**Development Status:** ${entry.developmentStatus || 'Not specified'}`,
+    `**Maintenance Status:** ${entry.maintenanceStatus || 'Not specified'}`,
+    '',
     '## Features',
     ...entry.features.map(feature => `- ${feature}`),
+    '',
+    '## Query Languages',
+    ...entry.queryLanguage.map(lang => `- ${lang}`),
+    '',
+    '## Indexing Support',
+    ...entry.indexingSupport.map(index => `- ${index}`),
+    '',
+    '## Security Features',
+    ...entry.securityFeatures.map(security => `- ${security}`),
+    '',
+    '## Performance Characteristics',
+    ...entry.performanceCharacteristics.map(perf => `- ${perf}`),
+    '',
+    '## Scalability Options',
+    ...entry.scalabilityOptions.map(scale => `- ${scale}`),
+    '',
+    '## Backup Options',
+    ...entry.backupOptions.map(backup => `- ${backup}`),
     '',
     '## Use Cases',
     ...entry.useCases.map(useCase => `- ${useCase}`),
     '',
+    '## Detailed Use Cases',
+    ...entry.useCaseDetails.map(detail => 
+      `### ${detail.title}\n${detail.description}\n` +
+      (detail.industry ? `Industry: ${detail.industry}\n` : '') +
+      (detail.companySize ? `Company Size: ${detail.companySize}\n` : '') +
+      (detail.technicalRequirements?.map(req => `- Requirement: ${req}`).join('\n') || '') +
+      (detail.benefits?.map(benefit => `- Benefit: ${benefit}`).join('\n') || '') +
+      (detail.challenges?.map(challenge => `- Challenge: ${challenge}`).join('\n') || '')
+    ),
+    '',
     '## Supported Languages',
     ...entry.languages.map(language => `- ${language}`),
+    '',
+    '## Cloud Providers',
+    ...entry.cloudProviders.map(provider => `- ${provider}`),
+    '',
+    '## API Support',
+    ...entry.apiSupport.map(api => `- ${api}`),
+    '',
+    '## Integrations',
+    ...entry.integrations.map(integration => `- ${integration}`),
+    '',
+    '## Community & Support',
+    `**Community Size:** ${entry.communitySize || 'Not specified'}`,
+    `**Release Frequency:** ${entry.releaseFrequency || 'Not specified'}`,
     '',
     '## Pros',
     ...entry.pros.map(pro => `- ${pro}`),
@@ -218,12 +393,26 @@ export const generateMarkdownContent = (entry: MarkdownDatabaseEntry): string =>
     '',
     '## Ratings',
     ...entry.ratings.map(rating => 
-      `User: ${rating.username}\nRating: ${rating.rating}\n${rating.comment || ''}`
+      `User: ${rating.username}\n` +
+      (rating.email ? `Email: ${rating.email}\n` : '') +
+      `Rating: ${rating.rating}\n` +
+      `Date: ${rating.date}\n` +
+      (rating.experience ? `Experience: ${rating.experience}\n` : '') +
+      (rating.useCase ? `Use Case: ${rating.useCase}\n` : '') +
+      (rating.companySize ? `Company Size: ${rating.companySize}\n` : '') +
+      (rating.industry ? `Industry: ${rating.industry}\n` : '') +
+      (rating.comment || '')
     ),
     '',
     '## Comments',
     ...entry.comments.map(comment => 
-      `User: ${comment.username}\nDate: ${comment.date}\n${comment.content}`
+      `User: ${comment.username}\n` +
+      (comment.email ? `Email: ${comment.email}\n` : '') +
+      `Date: ${comment.date}\n` +
+      (comment.experience ? `Experience: ${comment.experience}\n` : '') +
+      (comment.useCase ? `Use Case: ${comment.useCase}\n` : '') +
+      (comment.helpful ? `Helpful: ${comment.helpful}\n` : '') +
+      comment.content
     ),
   ];
 
@@ -262,6 +451,28 @@ export const convertToMarkdownEntry = (db: DatabaseType): MarkdownDatabaseEntry 
     contributors: db.contributors || '',
     ratings: [],
     comments: [],
+    // Initialize comprehensive fields with defaults
+    officialDescription: db.description,
+    architecture: '',
+    dataModel: db.type,
+    queryLanguage: [],
+    indexingSupport: [],
+    replicationSupport: false,
+    shardingSupport: false,
+    backupOptions: [],
+    securityFeatures: [],
+    performanceCharacteristics: [],
+    scalabilityOptions: [],
+    communitySize: '',
+    enterpriseSupport: false,
+    cloudProviders: [],
+    onPremiseSupport: db.selfHosted,
+    apiSupport: [],
+    integrations: [],
+    developmentStatus: 'Active',
+    latestVersion: '',
+    releaseFrequency: '',
+    maintenanceStatus: 'Maintained',
   };
 };
 
