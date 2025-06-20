@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Database, Menu, X, PlusCircle, Search } from "lucide-react";
+import { Database, Menu, X, PlusCircle, Search, Bot } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -38,6 +38,13 @@ const Navbar = () => {
             className="text-foreground hover:text-db-primary transition-colors"
           >
             Categories
+          </Link>
+          <Link
+            to="/ai-recommendation"
+            className="text-foreground hover:text-db-primary transition-colors flex items-center gap-1"
+          >
+            <Bot className="h-4 w-4" />
+            AI Consultant
           </Link>
           <Link
             to="/contribute"
@@ -122,6 +129,14 @@ const Navbar = () => {
             onClick={() => setIsMenuOpen(false)}
           >
             Categories
+          </Link>
+          <Link
+            to="/ai-recommendation"
+            className="block py-2 text-foreground hover:text-db-primary flex items-center gap-2"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            <Bot className="h-4 w-4" />
+            AI Consultant
           </Link>
           <Link
             to="/contribute"

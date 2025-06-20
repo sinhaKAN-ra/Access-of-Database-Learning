@@ -16,6 +16,7 @@ import SearchPage from "./pages/SearchPage";
 import EditDatabase from "./pages/EditDatabase";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import AIRecommendationPage from "./pages/AIRecommendationPage";
 import "./App.css";
 
 const queryClient = new QueryClient();
@@ -37,6 +38,7 @@ const App = () => (
           <Route path="/about" element={<AboutPage />} />
           <Route path="/contribute" element={<ContributePage />} />
           <Route path="/search" element={<SearchPage />} />
+          <Route path="/ai-recommendation" element={<AIRecommendationPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="*" element={<NotFound />} />
