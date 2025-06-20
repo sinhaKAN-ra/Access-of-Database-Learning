@@ -202,206 +202,289 @@ const AIRecommendationPage = () => {
   };
 
   return (
-    <Layout>
-      <div className="pt-16 pb-8 min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
-        <div className="container max-w-7xl px-4">
-          {/* Header */}
-          <div className="mb-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold flex items-center gap-3">
-                  <Bot className="h-8 w-8 text-blue-600" />
-                  AI Database Consultant
-                </h1>
-                <p className="text-muted-foreground mt-2">
-                  Get personalized database recommendations based on your project requirements
-                </p>
-              </div>
-              <div className="flex gap-2">
-                {currentRecommendation && (
-                  <Button onClick={exportRecommendation} variant="outline" size="sm">
-                    <Download className="h-4 w-4 mr-2" />
-                    Export
-                  </Button>
-                )}
-                <Button onClick={resetConversation} variant="outline" size="sm">
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                  Reset
-                </Button>
-              </div>
-            </div>
+    <div className="h-screen flex flex-col bg-background">
+      {/* Header */}
+      <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Bot className="h-6 w-6 text-blue-600" />
+            <h1 className="text-xl font-semibold">AI Database Consultant</h1>
           </div>
-
-          <div className="grid lg:grid-cols-2 gap-6 h-[calc(100vh-200px)]">
-            {/* Chat Interface - Left Side */}
-            <Card className="flex flex-col">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2">
-                  <Bot className="h-5 w-5" />
-                  AI Consultant Chat
-                </CardTitle>
-              </CardHeader>
-              
-              <CardContent className="flex-1 flex flex-col p-0">
-                {/* Messages */}
-                <ScrollArea className="flex-1 px-6">
-                  <div className="space-y-4 pb-4">
-                    {messages.map((message) => (
-                      <div
-                        key={message.id}
-                        className={`flex gap-3 ${
-                          message.type === 'user' ? 'justify-end' : 'justify-start'
-                        }`}
-                      >
-                        {message.type === 'ai' && (
-                          <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center flex-shrink-0">
-                            <Bot className="h-4 w-4 text-blue-600" />
-                          </div>
-                        )}
-                        
-                        <div
-                          className={`max-w-[80%] rounded-lg px-4 py-2 ${
-                            message.type === 'user'
-                              ? 'bg-blue-600 text-white'
-                              : 'bg-muted'
-                          }`}
-                        >
-                          <div className="whitespace-pre-wrap text-sm">
-                            {message.content}
-                          </div>
-                          <div className="text-xs opacity-70 mt-1">
-                            {message.timestamp.toLocaleTimeString()}
-                          </div>
-                        </div>
-
-                        {message.type === 'user' && (
-                          <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
-                            <User className="h-4 w-4" />
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                    
-                    {isTyping && (
-                      <div className="flex gap-3 justify-start">
-                        <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
-                          <Bot className="h-4 w-4 text-blue-600" />
-                        </div>
-                        <div className="bg-muted rounded-lg px-4 py-2">
-                          <div className="flex space-x-1">
-                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  <div ref={messagesEndRef} />
-                </ScrollArea>
-
-                {/* Input */}
-                <div className="p-4 border-t">
-                  <div className="flex gap-2">
-                    <Input
-                      value={inputMessage}
-                      onChange={(e) => setInputMessage(e.target.value)}
-                      onKeyPress={handleKeyPress}
-                      placeholder="Describe your project requirements..."
-                      className="flex-1"
-                      disabled={isTyping}
-                    />
-                    <Button 
-                      onClick={handleSendMessage} 
-                      disabled={!inputMessage.trim() || isTyping}
-                      size="icon"
-                    >
-                      <Send className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Visualization Panel - Right Side */}
-            <div className="space-y-6">
-              {/* Current Requirements */}
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2">
-                    <Settings className="h-5 w-5" />
-                    Detected Requirements
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {userRequirements.projectType && (
-                      <div className="flex items-center gap-2">
-                        <Target className="h-4 w-4 text-blue-600" />
-                        <span className="text-sm font-medium">Project Type:</span>
-                        <Badge variant="outline">{userRequirements.projectType}</Badge>
-                      </div>
-                    )}
-                    {userRequirements.expectedLoad && (
-                      <div className="flex items-center gap-2">
-                        <Zap className="h-4 w-4 text-orange-600" />
-                        <span className="text-sm font-medium">Expected Load:</span>
-                        <Badge variant="outline">{userRequirements.expectedLoad}</Badge>
-                      </div>
-                    )}
-                    {userRequirements.budget && (
-                      <div className="flex items-center gap-2">
-                        <Database className="h-4 w-4 text-green-600" />
-                        <span className="text-sm font-medium">Budget:</span>
-                        <Badge variant="outline">{userRequirements.budget}</Badge>
-                      </div>
-                    )}
-                    {userRequirements.team && (
-                      <div className="flex items-center gap-2">
-                        <User className="h-4 w-4 text-purple-600" />
-                        <span className="text-sm font-medium">Team Size:</span>
-                        <Badge variant="outline">{userRequirements.team}</Badge>
-                      </div>
-                    )}
-                    {userRequirements.performance && userRequirements.performance.length > 0 && (
-                      <div className="flex items-start gap-2">
-                        <Zap className="h-4 w-4 text-red-600 mt-0.5" />
-                        <span className="text-sm font-medium">Performance:</span>
-                        <div className="flex flex-wrap gap-1">
-                          {userRequirements.performance.map((perf, index) => (
-                            <Badge key={index} variant="outline" className="text-xs">
-                              {perf}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    {Object.keys(userRequirements).length === 0 && (
-                      <p className="text-sm text-muted-foreground">
-                        Start chatting to help me understand your requirements...
-                      </p>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Recommendation Summary */}
-              {currentRecommendation && (
-                <RecommendationSummary recommendation={currentRecommendation} />
-              )}
-
-              {/* Architecture Diagram */}
-              {currentRecommendation && (
-                <DatabaseArchitectureDiagram 
-                  recommendation={currentRecommendation}
-                  requirements={userRequirements}
-                />
-              )}
-            </div>
+          <div className="flex gap-2">
+            {currentRecommendation && (
+              <Button onClick={exportRecommendation} variant="outline" size="sm">
+                <Download className="h-4 w-4 mr-2" />
+                Export
+              </Button>
+            )}
+            <Button onClick={resetConversation} variant="outline" size="sm">
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Reset
+            </Button>
           </div>
         </div>
       </div>
-    </Layout>
+
+      {/* Main Content - Bolt.new style layout */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Left Panel - Fixed Chat Interface */}
+        <div className="w-96 border-r bg-background flex flex-col">
+          {/* Chat Header */}
+          <div className="p-4 border-b">
+            <div className="flex items-center gap-2">
+              <Bot className="h-5 w-5 text-blue-600" />
+              <span className="font-medium">AI Consultant</span>
+            </div>
+            <p className="text-sm text-muted-foreground mt-1">
+              Get personalized database recommendations
+            </p>
+          </div>
+
+          {/* Messages Area */}
+          <ScrollArea className="flex-1 p-4">
+            <div className="space-y-4">
+              {messages.map((message) => (
+                <div
+                  key={message.id}
+                  className={`flex gap-3 ${
+                    message.type === 'user' ? 'justify-end' : 'justify-start'
+                  }`}
+                >
+                  {message.type === 'ai' && (
+                    <div className="w-7 h-7 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center flex-shrink-0 mt-1">
+                      <Bot className="h-4 w-4 text-blue-600" />
+                    </div>
+                  )}
+                  
+                  <div
+                    className={`max-w-[85%] rounded-lg px-3 py-2 text-sm ${
+                      message.type === 'user'
+                        ? 'bg-blue-600 text-white ml-auto'
+                        : 'bg-muted'
+                    }`}
+                  >
+                    <div className="whitespace-pre-wrap">
+                      {message.content}
+                    </div>
+                    <div className="text-xs opacity-70 mt-1">
+                      {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </div>
+                  </div>
+
+                  {message.type === 'user' && (
+                    <div className="w-7 h-7 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0 mt-1">
+                      <User className="h-4 w-4" />
+                    </div>
+                  )}
+                </div>
+              ))}
+              
+              {isTyping && (
+                <div className="flex gap-3 justify-start">
+                  <div className="w-7 h-7 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
+                    <Bot className="h-4 w-4 text-blue-600" />
+                  </div>
+                  <div className="bg-muted rounded-lg px-3 py-2">
+                    <div className="flex space-x-1">
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div ref={messagesEndRef} />
+          </ScrollArea>
+
+          {/* Input Area */}
+          <div className="p-4 border-t">
+            <div className="flex gap-2">
+              <Input
+                value={inputMessage}
+                onChange={(e) => setInputMessage(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Describe your project..."
+                className="flex-1"
+                disabled={isTyping}
+              />
+              <Button 
+                onClick={handleSendMessage} 
+                disabled={!inputMessage.trim() || isTyping}
+                size="icon"
+                className="shrink-0"
+              >
+                <Send className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Panel - Response and Visualizations */}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          {/* Requirements Header */}
+          <div className="p-6 border-b bg-muted/30">
+            <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
+              <Settings className="h-5 w-5" />
+              Detected Requirements
+            </h2>
+            <div className="flex flex-wrap gap-2">
+              {userRequirements.projectType && (
+                <Badge variant="outline" className="flex items-center gap-1">
+                  <Target className="h-3 w-3" />
+                  {userRequirements.projectType}
+                </Badge>
+              )}
+              {userRequirements.expectedLoad && (
+                <Badge variant="outline" className="flex items-center gap-1">
+                  <Zap className="h-3 w-3" />
+                  {userRequirements.expectedLoad} load
+                </Badge>
+              )}
+              {userRequirements.budget && (
+                <Badge variant="outline" className="flex items-center gap-1">
+                  <Database className="h-3 w-3" />
+                  {userRequirements.budget} budget
+                </Badge>
+              )}
+              {userRequirements.team && (
+                <Badge variant="outline" className="flex items-center gap-1">
+                  <User className="h-3 w-3" />
+                  {userRequirements.team} team
+                </Badge>
+              )}
+              {userRequirements.performance && userRequirements.performance.length > 0 && (
+                userRequirements.performance.map((perf, index) => (
+                  <Badge key={index} variant="outline" className="flex items-center gap-1">
+                    <Zap className="h-3 w-3" />
+                    {perf}
+                  </Badge>
+                ))
+              )}
+              {Object.keys(userRequirements).length === 0 && (
+                <span className="text-sm text-muted-foreground">
+                  Start chatting to help me understand your requirements...
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Main Content Area */}
+          <ScrollArea className="flex-1">
+            <div className="p-6 space-y-6">
+              {!currentRecommendation ? (
+                <div className="flex items-center justify-center h-64 text-center">
+                  <div>
+                    <Bot className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-medium mb-2">Ready to help!</h3>
+                    <p className="text-muted-foreground max-w-md">
+                      Tell me about your project in the chat, and I'll provide personalized database recommendations with architecture diagrams.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  {/* Recommendation Summary */}
+                  <RecommendationSummary recommendation={currentRecommendation} />
+                  
+                  {/* Architecture Diagram */}
+                  <DatabaseArchitectureDiagram 
+                    recommendation={currentRecommendation}
+                    requirements={userRequirements}
+                  />
+
+                  {/* Implementation Details */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Database className="h-5 w-5" />
+                        Implementation Plan
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid md:grid-cols-2 gap-6">
+                        <div>
+                          <h4 className="font-medium mb-3">Implementation Steps</h4>
+                          <ol className="space-y-2">
+                            {currentRecommendation.implementation.steps.map((step, index) => (
+                              <li key={index} className="flex gap-3 text-sm">
+                                <span className="flex-shrink-0 w-6 h-6 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center text-xs font-medium">
+                                  {index + 1}
+                                </span>
+                                <span>{step}</span>
+                              </li>
+                            ))}
+                          </ol>
+                        </div>
+                        
+                        <div>
+                          <h4 className="font-medium mb-3">Key Considerations</h4>
+                          <ul className="space-y-2">
+                            {currentRecommendation.implementation.considerations.map((consideration, index) => (
+                              <li key={index} className="flex gap-2 text-sm">
+                                <div className="w-1.5 h-1.5 bg-orange-500 rounded-full mt-2 flex-shrink-0"></div>
+                                <span>{consideration}</span>
+                              </li>
+                            ))}
+                          </ul>
+                          
+                          <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
+                            <div className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                              Estimated Timeline
+                            </div>
+                            <div className="text-sm text-blue-700 dark:text-blue-300">
+                              {currentRecommendation.implementation.timeline}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Cost Breakdown */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Database className="h-5 w-5" />
+                        Cost Analysis
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-3 gap-4">
+                        <div className="text-center p-4 bg-green-50 dark:bg-green-950/20 rounded-lg">
+                          <div className="text-sm font-medium text-green-800 dark:text-green-200">
+                            Development
+                          </div>
+                          <div className="text-lg font-semibold text-green-700 dark:text-green-300">
+                            {currentRecommendation.costs.development}
+                          </div>
+                        </div>
+                        <div className="text-center p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
+                          <div className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                            Operational
+                          </div>
+                          <div className="text-lg font-semibold text-blue-700 dark:text-blue-300">
+                            {currentRecommendation.costs.operational}
+                          </div>
+                        </div>
+                        <div className="text-center p-4 bg-purple-50 dark:bg-purple-950/20 rounded-lg">
+                          <div className="text-sm font-medium text-purple-800 dark:text-purple-200">
+                            Scaling
+                          </div>
+                          <div className="text-lg font-semibold text-purple-700 dark:text-purple-300">
+                            {currentRecommendation.costs.scaling}
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </>
+              )}
+            </div>
+          </ScrollArea>
+        </div>
+      </div>
+    </div>
   );
 };
 
