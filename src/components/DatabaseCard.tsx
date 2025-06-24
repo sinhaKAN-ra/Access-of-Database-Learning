@@ -37,7 +37,7 @@ const DatabaseCard = ({ database, featured = false }: DatabaseCardProps) => {
         )}
       </div>
 
-      <p className="text-muted-foreground mb-4">
+      <p className="text-muted-foreground mb-4 text-left">
         {database.shortDescription || database.description.substring(0, 120) + '...'}
       </p>
 

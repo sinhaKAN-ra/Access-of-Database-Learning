@@ -3,14 +3,14 @@ import { useState, useEffect } from "react";
 import { 
   Star, 
   MessageSquare, 
-  ThumbsUp, 
   Send, 
   CheckCircle, 
   XCircle, 
   ExternalLink, 
   Share2, 
   Edit, 
-  Flag 
+  Flag,
+  Github
 } from "lucide-react";
 import { getDatabaseBySlug } from "@/services/databaseService";
 import { 
@@ -33,20 +33,13 @@ import {
   CardDescription 
 } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle,
-  DialogDescription,
-  DialogFooter
-} from "@/components/ui/dialog";
+import { GitHubUsernamePrompt } from "@/components/GitHubUsernamePrompt";
 
 // Component for user interactions (ratings and comments)
-const DatabaseInteractions = ({ databaseId }) => {
+const DatabaseInteractions = ({ databaseSlug }) => {
   const { toast } = useToast();
   const [userRating, setUserRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
@@ -57,7 +50,7 @@ const DatabaseInteractions = ({ databaseId }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoadingComments, setIsLoadingComments] = useState(true);
   const [user, setUser] = useState(null);
-  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const [showUsernamePrompt, setShowUsernamePrompt] = useState(false);
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -65,15 +58,14 @@ const DatabaseInteractions = ({ databaseId }) => {
         const profile = await getUserProfile();
         setUser(profile);
       } catch (err) {
-        // User is not logged in
-        console.log("User not logged in");
+        console.log("No GitHub username set");
       }
     };
 
     const fetchComments = async () => {
       setIsLoadingComments(true);
       try {
-        const result = await getCommentsForDatabase(databaseId);
+        const result = await getCommentsForDatabase(databaseSlug);
         setComments(result);
       } catch (err) {
         console.error("Error fetching comments", err);
@@ -84,7 +76,7 @@ const DatabaseInteractions = ({ databaseId }) => {
 
     const fetchRating = async () => {
       try {
-        const result = await getRatingForDatabase(databaseId);
+        const result = await getRatingForDatabase(databaseSlug);
         setAverageRating(result.averageRating);
         setRatingCount(result.totalRatings);
       } catch (err) {
@@ -95,18 +87,18 @@ const DatabaseInteractions = ({ databaseId }) => {
     fetchUserProfile();
     fetchComments();
     fetchRating();
-  }, [databaseId]);
+  }, [databaseSlug]);
 
   const handleRatingChange = async (rating) => {
     if (!user) {
-      setShowLoginPrompt(true);
+      setShowUsernamePrompt(true);
       return;
     }
 
     try {
-      await addOrUpdateRating(databaseId, rating);
+      await addOrUpdateRating(databaseSlug, rating);
       setUserRating(rating);
-      const { averageRating, totalRatings } = await getRatingForDatabase(databaseId);
+      const { averageRating, totalRatings } = await getRatingForDatabase(databaseSlug);
       setAverageRating(averageRating);
       setRatingCount(totalRatings);
       toast({
@@ -117,7 +109,7 @@ const DatabaseInteractions = ({ databaseId }) => {
       console.error("Error updating rating", err);
       toast({
         variant: "destructive",
-        description: "Failed to submit rating. Please try again.",
+        description: err.message || "Failed to submit rating. Please try again.",
         duration: 3000,
       });
     }
@@ -126,7 +118,7 @@ const DatabaseInteractions = ({ databaseId }) => {
   const handleSubmitComment = async (e) => {
     e.preventDefault();
     if (!user) {
-      setShowLoginPrompt(true);
+      setShowUsernamePrompt(true);
       return;
     }
 
@@ -134,7 +126,7 @@ const DatabaseInteractions = ({ databaseId }) => {
 
     setIsSubmitting(true);
     try {
-      const newComment = await addComment(databaseId, commentText);
+      const newComment = await addComment(databaseSlug, commentText);
       setComments([newComment, ...comments]);
       setCommentText("");
       toast({
@@ -145,12 +137,17 @@ const DatabaseInteractions = ({ databaseId }) => {
       console.error("Error posting comment", err);
       toast({
         variant: "destructive",
-        description: "Failed to post comment. Please try again.",
+        description: err.message || "Failed to post comment. Please try again.",
         duration: 3000,
       });
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleUsernameSet = async (username) => {
+    const profile = await getUserProfile();
+    setUser(profile);
   };
 
   const formatDate = (dateString) => {
@@ -168,7 +165,7 @@ const DatabaseInteractions = ({ databaseId }) => {
       <Card className="mb-6">
         <CardHeader className="pb-3">
           <div className="flex justify-between items-center">
-            <CardTitle>User Ratings</CardTitle>
+            <CardTitle>Community Ratings</CardTitle>
             <div className="flex items-center bg-muted rounded-md px-3 py-1">
               <span className="text-2xl font-bold text-yellow-500 mr-1">{averageRating.toFixed(1)}</span>
               <div className="flex flex-col">
@@ -190,7 +187,9 @@ const DatabaseInteractions = ({ databaseId }) => {
               </div>
             </div>
           </div>
-          <CardDescription>Share your experience with this database</CardDescription>
+          <CardDescription>
+            Share your experience with this database (GitHub username required)
+          </CardDescription>
         </CardHeader>
 
         <CardContent>
@@ -222,28 +221,12 @@ const DatabaseInteractions = ({ databaseId }) => {
                   You rated this database {userRating} {userRating === 1 ? "star" : "stars"}
                 </p>
               )}
-            </div>
-            
-            <div className="flex-1 flex-col border-l pl-6 hidden sm:block">
-              <div className="space-y-1">
-                {[5, 4, 3, 2, 1].map((num) => {
-                  //  This would be calculated from actual data
-                  const percentage = Math.round(Math.random() * 100);
-                  return (
-                    <div key={num} className="flex items-center gap-2">
-                      <span className="text-xs w-3">{num}</span>
-                      <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
-                      <div className="h-2 flex-1 bg-muted rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-yellow-500 rounded-full" 
-                          style={{ width: `${percentage}%` }}
-                        />
-                      </div>
-                      <span className="text-xs text-muted-foreground w-8">{percentage}%</span>
-                    </div>
-                  );
-                })}
-              </div>
+              {!user && (
+                <p className="text-sm text-muted-foreground mt-2 flex items-center gap-1">
+                  <Github className="h-4 w-4" />
+                  Set your GitHub username to rate and comment
+                </p>
+              )}
             </div>
           </div>
         </CardContent>
@@ -253,11 +236,14 @@ const DatabaseInteractions = ({ databaseId }) => {
       <Card>
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
-            <CardTitle>Comments</CardTitle>
+            <CardTitle>Community Comments</CardTitle>
             <span className="text-sm rounded-full bg-muted px-2 py-1">
               {comments.length} {comments.length === 1 ? "comment" : "comments"}
             </span>
           </div>
+          <CardDescription>
+            All comments are stored in the repository and publicly visible
+          </CardDescription>
         </CardHeader>
 
         <CardContent>
@@ -265,18 +251,13 @@ const DatabaseInteractions = ({ databaseId }) => {
           <form onSubmit={handleSubmitComment} className="mb-6">
             <div className="flex gap-3">
               <Avatar className="h-8 w-8 hidden sm:block">
-                {user ? (
-                  <>
-                    <AvatarImage src={user.avatarUrl} alt={user.username} />
-                    <AvatarFallback>{user?.username?.charAt(0).toUpperCase() || "U"}</AvatarFallback>
-                  </>
-                ) : (
-                  <AvatarFallback>?</AvatarFallback>
-                )}
+                <AvatarFallback>
+                  {user ? user.username.charAt(0).toUpperCase() : <Github className="h-4 w-4" />}
+                </AvatarFallback>
               </Avatar>
               <div className="relative flex-1">
                 <Textarea
-                  placeholder={user ? "Share your thoughts on this database..." : "Sign in to comment"}
+                  placeholder={user ? "Share your thoughts on this database..." : "Set your GitHub username to comment"}
                   value={commentText}
                   onChange={(e) => setCommentText(e.target.value)}
                   className="pr-12 resize-none"
@@ -295,6 +276,20 @@ const DatabaseInteractions = ({ databaseId }) => {
                 </Button>
               </div>
             </div>
+            {!user && (
+              <div className="mt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowUsernamePrompt(true)}
+                  className="flex items-center gap-2"
+                >
+                  <Github className="h-4 w-4" />
+                  Set GitHub Username
+                </Button>
+              </div>
+            )}
           </form>
 
           <Separator className="my-6" />
@@ -316,37 +311,22 @@ const DatabaseInteractions = ({ databaseId }) => {
           ) : comments.length > 0 ? (
             <div className="space-y-6">
               {comments.map((comment, index) => (
-                <div key={comment.id} className="group">
+                <div key={index} className="group">
                   <div className="flex gap-3">
                     <Avatar className="h-10 w-10">
-                      <AvatarImage src={comment.user.avatarUrl} alt={comment.user.username} />
-                      <AvatarFallback>{comment.user.username.charAt(0).toUpperCase()}</AvatarFallback>
+                      <AvatarFallback>{comment.username?.charAt(0).toUpperCase() || 'U'}</AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
-                      <div className="flex items-baseline">
-                        <h4 className="font-medium text-sm">{comment.user.username}</h4>
-                        <span className="ml-2 text-xs text-muted-foreground">
-                          {formatDate(comment.createdAt)}
+                      <div className="flex items-baseline gap-2">
+                        <h4 className="font-medium text-sm flex items-center gap-1">
+                          <Github className="h-3 w-3" />
+                          {comment.username}
+                        </h4>
+                        <span className="text-xs text-muted-foreground">
+                          {formatDate(comment.date)}
                         </span>
-                        {comment.userRating > 0 && (
-                          <div className="ml-2 flex items-center">
-                            <span className="text-xs text-muted-foreground mr-1">Rated:</span>
-                            <div className="flex">
-                              {[1, 2, 3, 4, 5].map((star) => (
-                                <Star
-                                  key={star}
-                                  className={`h-3 w-3 ${
-                                    star <= comment.userRating
-                                      ? "text-yellow-500 fill-yellow-500"
-                                      : "text-muted-foreground"
-                                  }`}
-                                />
-                              ))}
-                            </div>
-                          </div>
-                        )}
                       </div>
-                      <p className="mt-1 text-sm">{comment.text}</p>
+                      <p className="mt-1 text-sm whitespace-pre-wrap">{comment.content}</p>
                     </div>
                   </div>
                   {index < comments.length - 1 && <Separator className="mt-4" />}
@@ -363,25 +343,12 @@ const DatabaseInteractions = ({ databaseId }) => {
         </CardContent>
       </Card>
 
-      {/* Login Prompt Dialog */}
-      <Dialog open={showLoginPrompt} onOpenChange={setShowLoginPrompt}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Sign in required</DialogTitle>
-            <DialogDescription>
-              You need to be signed in to rate or comment on databases.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="sm:justify-start">
-            <Button variant="outline" onClick={() => setShowLoginPrompt(false)}>
-              Cancel
-            </Button>
-            <Button asChild>
-              <a href="/login">Sign In</a>
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* GitHub Username Prompt */}
+      <GitHubUsernamePrompt
+        open={showUsernamePrompt}
+        onOpenChange={setShowUsernamePrompt}
+        onUsernameSet={handleUsernameSet}
+      />
     </>
   );
 };
@@ -419,6 +386,21 @@ const DatabaseDetail = () => {
       duration: 2000,
     });
   };
+
+  const handleSharing = () => {
+    if(navigator.share) {
+      navigator.share({
+        title: database?.name,
+        text: `Check out this database: ${database?.name}`,
+        url: window.location.href,
+      }).catch((err) => {
+        console.error("Error sharing:", err);
+        handleCopyLink();
+      });
+    } else {
+      handleCopyLink();
+    }
+  }
 
   if (loading) {
     return (
@@ -478,6 +460,9 @@ const DatabaseDetail = () => {
                 {/* Title and badges */}
                 <div className="flex-grow">
                   <h1 className="text-3xl md:text-4xl font-bold mb-3">{database.name}</h1>
+                  {database.tagline && (
+                    <p className="text-lg text-muted-foreground mb-3">{database.tagline}</p>
+                  )}
                   <div className="flex flex-wrap gap-2">
                     <Badge variant="outline" className="border-db-primary text-db-primary">
                       {database.category}
@@ -517,7 +502,7 @@ const DatabaseDetail = () => {
                       </a>
                     </Button>
                   )}
-                  <Button variant="ghost" size="sm" onClick={handleCopyLink}>
+                  <Button variant="ghost" size="sm" onClick={handleSharing}>
                     <Share2 className="mr-2 h-4 w-4" />
                     Share
                   </Button>
@@ -535,6 +520,12 @@ const DatabaseDetail = () => {
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground">{database.description}</p>
+                  {database.keyStrength && (
+                    <div className="mt-4 p-3 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-800">
+                      <h4 className="font-medium text-green-800 dark:text-green-200 mb-1">Key Strength</h4>
+                      <p className="text-green-700 dark:text-green-300 text-sm">{database.keyStrength}</p>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
 
@@ -579,9 +570,6 @@ const DatabaseDetail = () => {
               {/* Pros and Cons Card */}
               {database.pros && database.cons && (database.pros.length > 0 || database.cons.length > 0) && (
                 <Card>
-                  {/* <CardHeader className="pb-3">
-                    <CardTitle>Pros and Cons</CardTitle>
-                  </CardHeader> */}
                   <CardContent>
                     <div className="pt-3 grid md:grid-cols-2 gap-6">
                       {database.pros && database.pros.length > 0 && (
@@ -616,8 +604,27 @@ const DatabaseDetail = () => {
                 </Card>
               )}
 
+              {/* Not Recommended For */}
+              {database.notRecommendedFor && database.notRecommendedFor.length > 0 && (
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle>Not Recommended For</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-2">
+                      {database.notRecommendedFor.map((item, index) => (
+                        <li key={index} className="flex items-start">
+                          <XCircle className="h-5 w-5 text-orange-500 mr-2 flex-shrink-0 mt-0.5" />
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </Card>
+              )}
+
               {/* Database Interactions Component */}
-              <DatabaseInteractions databaseId={database.id} />
+              <DatabaseInteractions databaseSlug={database.slug} />
             </div>
 
             <div className="space-y-6">
@@ -677,6 +684,13 @@ const DatabaseDetail = () => {
                     <h3 className="text-sm font-medium text-muted-foreground mb-1">Last Updated</h3>
                     <p>{new Date(database.updatedAt).toLocaleDateString()}</p>
                   </div>
+
+                  {database.contributors && (
+                    <div>
+                      <h3 className="text-sm font-medium text-muted-foreground mb-1">Contributors</h3>
+                      <p className="text-sm">{database.contributors}</p>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
 
@@ -687,7 +701,8 @@ const DatabaseDetail = () => {
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground mb-4">
-                    Is this information incorrect or incomplete? Help us improve this database profile!
+                    This database information is stored as a markdown file in our repository. 
+                    Help us improve this profile!
                   </p>
                   <div className="flex flex-col space-y-2">
                     <Button variant="outline" className="w-full justify-start" asChild>
@@ -695,6 +710,12 @@ const DatabaseDetail = () => {
                         <Edit className="mr-2 h-4 w-4" />
                         Edit this database
                       </Link>
+                    </Button>
+                    <Button variant="ghost" className="w-full justify-start" asChild>
+                      <a href="https://github.com/aolbeam/db-directory" target="_blank" rel="noopener noreferrer">
+                        <Github className="mr-2 h-4 w-4" />
+                        View on GitHub
+                      </a>
                     </Button>
                     <Button variant="ghost" className="w-full justify-start">
                       <Flag className="mr-2 h-4 w-4" />
