@@ -17,6 +17,7 @@ import EditDatabase from "./pages/EditDatabase";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import "./App.css";
+import { Analytics } from "@vercel/analytics/next"
 
 const queryClient = new QueryClient();
 
@@ -42,6 +43,7 @@ const App = () => (
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>
+      <Analytics />
     </TooltipProvider>
   </QueryClientProvider>
 );
